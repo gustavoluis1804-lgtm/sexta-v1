@@ -1,0 +1,131 @@
+name: Gerar APK Sexta Feira
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sexta-feira-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    name: Compilar e verificar APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SEXTA_TOOLS_DIR: ${{ runner.temp }}/sexta-android-tools
+    steps:
+      - name: Baixar o projeto
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Preparar Java 17
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Preparar os arquivos do app
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          import zipfile
+
+          root = Path.cwd()
+          if (root / 'build-apk.py').is_file():
+              project = root
+          else:
+              archive = root / 'Sexta-Feira-projeto.zip'
+              if not archive.is_file():
+                  raise SystemExit('Envie Sexta-Feira-projeto.zip para a raiz do repositório e execute novamente.')
+              destination = Path(os.environ['RUNNER_TEMP']) / 'sexta-fonte'
+              destination.mkdir(parents=True, exist_ok=True)
+              with zipfile.ZipFile(archive) as package:
+                  for member in package.infolist():
+                      target = (destination / member.filename).resolve()
+                      if not target.is_relative_to(destination.resolve()):
+                          raise SystemExit('O ZIP contém um caminho inválido.')
+                  package.extractall(destination)
+              builders = list(destination.rglob('build-apk.py'))
+              if len(builders) != 1:
+                  raise SystemExit('O ZIP precisa conter exatamente um projeto com build-apk.py.')
+              project = builders[0].parent
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as env:
+              env.write(f'SEXTA_PROJECT_DIR={project}\n')
+          print('Projeto preparado para compilação.')
+          PY
+
+      - name: Preparar assinatura opcional para atualizações
+        env:
+          SEXTA_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          SEXTA_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import os
+
+          encoded = os.environ.get('SEXTA_KEYSTORE_BASE64', '').strip()
+          password = os.environ.get('SEXTA_STORE_PASSWORD', '')
+          if bool(encoded) != bool(password):
+              raise SystemExit('Configure os dois secrets: ANDROID_KEYSTORE_BASE64 e ANDROID_KEYSTORE_PASSWORD, ou remova ambos para gerar um APK de teste.')
+          if encoded:
+              key = Path(os.environ['RUNNER_TEMP']) / 'sexta-assinatura.keystore'
+              key.write_bytes(base64.b64decode(''.join(encoded.split()), validate=True))
+              key.chmod(0o600)
+              with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as env:
+                  env.write(f'SEXTA_KEYSTORE_PATH={key}\n')
+              message = 'APK assinado com sua chave configurada nos secrets.'
+          else:
+              message = 'APK de teste: a assinatura é criada nesta execução. Para instalar sobre uma versão anterior, configure uma chave fixa conforme GUIA-GITHUB.md; sem ela, será necessário desinstalar a versão anterior.'
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as summary:
+              summary.write(message + '\n\n')
+          PY
+
+      - name: Compilar APK e testar comandos
+        working-directory: ${{ env.SEXTA_PROJECT_DIR }}
+        env:
+          SEXTA_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        shell: bash
+        run: |
+          python3 build-apk.py --tools "$SEXTA_TOOLS_DIR" --output "$SEXTA_PROJECT_DIR/build/Sexta-Feira.apk" --test
+
+      - name: Disponibilizar APK para download
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: Sexta-Feira-APK
+          path: ${{ env.SEXTA_PROJECT_DIR }}/build/Sexta-Feira.apk
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+      - name: Mostrar como baixar
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as summary:
+              summary.write('### APK pronto\n\nAbra **Artifacts → Sexta-Feira-APK** nesta execução. Extraia o ZIP baixado e instale **Sexta-Feira.apk** no Android.\n')
+          PY
+
+      - name: Limpar as chaves temporárias
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          key = os.environ.get('SEXTA_KEYSTORE_PATH')
+          if key:
+              Path(key).unlink(missing_ok=True)
+          (Path(os.environ['SEXTA_TOOLS_DIR']) / 'sexta-feira-local.keystore').unlink(missing_ok=True)
+          PY
