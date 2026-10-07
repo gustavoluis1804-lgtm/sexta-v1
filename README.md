@@ -4,6 +4,16 @@ Primeira versão instalável da Sexta Feira. Usa reconhecimento de voz do Androi
 respostas faladas em português, o rosto animado com 12 expressões e comandos locais
 para abrir apps e ajudar a controlar a tela.
 
+## Gerar o APK no GitHub
+
+Veja **[GUIA-GITHUB.md](GUIA-GITHUB.md)**. Pelo celular, você pode enviar
+`Sexta-Feira-projeto.zip` ao repositório e criar
+`.github/workflows/gerar-apk.yml` com o arquivo pronto recebido nesta conversa.
+
+O fluxo **Gerar APK Sexta Feira** prepara Java 17, extrai o projeto, testa,
+compila e verifica o app. O APK fica em **Actions → execução → Artifacts →
+Sexta-Feira-APK**. Também funciona com todo o código extraído na raiz do repositório.
+
 ## Instalar
 
 1. Transfira `Sexta-Feira.apk` para um celular com Android 8 ou mais recente.
@@ -96,6 +106,17 @@ compila recursos e Java, converte para DEX, alinha e assina o APK. O resultado f
 em `build/Sexta-Feira.apk`. A chave de assinatura local fica na pasta `android-tools`,
 fora do projeto. Guarde essa chave para assinar futuras atualizações compatíveis;
 uma compilação em outra máquina cria uma assinatura diferente.
+
+Para compilar e rodar os testes de comandos na mesma execução:
+
+```sh
+python3 build-apk.py --test
+```
+
+Uma chave existente pode ser usada com `--keystore CAMINHO`, com a senha em
+`SEXTA_STORE_PASSWORD`. `SEXTA_KEY_PASSWORD` e `SEXTA_KEY_ALIAS` podem ser definidos
+se a senha da chave ou o alias forem diferentes. O fluxo do GitHub usa os secrets
+opcionais explicados no guia para manter a mesma assinatura em atualizações.
 
 ## Verificação realizada
 

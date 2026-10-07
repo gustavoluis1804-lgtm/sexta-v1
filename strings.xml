@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Sexta Feira</string>
+    <string name="accessibility_description">Controla o celular por comandos que você fala ou digita. Pode ler os elementos visíveis da tela, tocar, preencher campos e navegar. Um botão flutuante permite chamar a assistente. A leitura da tela acontece somente quando você pede uma ação; não há envio da tela para servidores. Ative apenas se quiser usar esse controle. Você pode desligá-lo nas configurações do Android ou no aplicativo.</string>
+</resources>

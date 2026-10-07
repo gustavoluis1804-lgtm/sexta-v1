@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file:; script-src 'self' file:; style-src 'self' file:; img-src 'self' file: data:; connect-src 'none'; object-src 'none'; frame-src 'none'">
+  <title>Sexta Feira</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <svg class="icon-library" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-face" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="6"/><path d="M8 9h1M15 9h1M8 14q4 5 8 0"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 10-13h-8z"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M5 4v16M12 4v16M19 4v16"/><path d="M2 9h6M9 16h6M16 7h6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4 10-10"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-screen" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M5 17h14l-2-4V8a5 5 0 0 0-10 0v5zM10 21h4"/></symbol>
+    <symbol id="i-voice" viewBox="0 0 24 24"><path d="m3 9 5 0 5-5v16l-5-5H3zM17 8q5 4 0 8"/></symbol>
+  </defs></svg>
+  <div class="app-shell">
+    <header class="topbar"><div class="wordmark"><span class="brand-face">••<i>⌣</i></span><span>sexta feira<span class="brand-tag">SUA ASSISTENTE</span></span></div><span class="version">01 <span>/</span> ANDROID</span></header>
+    <main>
+      <section id="home" class="page active" aria-label="Assistente">
+        <div class="intro"><p class="eyebrow"><span class="dot"></span> PRONTA PARA VOCÊ</p><h1>Seu dia.<br>Uma ajuda a mais.</h1><p class="intro-text">Me diga o que vamos fazer.</p></div>
+        <div class="face-stage"><div class="face-grid"></div><span class="stage-corner left">SF / 01</span><span class="stage-corner right" id="emotion-label">NEUTRA</span><canvas id="face" aria-label="Rosto animado da Sexta Feira"></canvas><div class="face-caption"><span class="signal"><i></i><i></i><i></i><i></i></span><span id="face-state">Ao seu comando</span><span class="stage-plus">+</span></div></div>
+        <div class="reply"><span class="reply-icon"><svg><use href="#i-bolt"/></svg></span><p id="reply-text" aria-live="polite">Pronta para ajudar. Toque no microfone ou digite um comando.</p></div>
+        <button class="mic-button" id="listen"><svg><use href="#i-mic"/></svg><span>Falar com a Sexta Feira</span><svg class="small-arrow"><use href="#i-arrow"/></svg></button>
+        <form id="command-form" class="command-form"><input id="command-input" maxlength="1500" autocomplete="off" placeholder="Ou digite um comando…" aria-label="Digite um comando"><button type="submit" aria-label="Executar comando"><svg><use href="#i-arrow"/></svg></button></form>
+        <div class="section-label"><h2>Um toque para começar</h2><span>COMANDOS</span></div>
+        <div class="quick-actions">
+          <button data-command="abrir WhatsApp"><span class="quick-icon"><svg><use href="#i-grid"/></svg></span><strong>Abrir um app</strong><span>WhatsApp</span></button>
+          <button data-command="ler tela"><span class="quick-icon"><svg><use href="#i-screen"/></svg></span><strong>Ler a tela</strong><span>Texto em voz alta</span></button>
+          <button data-command="ler notificações"><span class="quick-icon"><svg><use href="#i-bell"/></svg></span><strong>Notificações</strong><span>As mais recentes</span></button>
+          <button data-command="bateria"><span class="quick-icon"><svg><use href="#i-bolt"/></svg></span><strong>Minha bateria</strong><span>Quanto falta?</span></button>
+        </div>
+        <div class="section-label"><h2>Como estou hoje</h2><span>EXPRESSÕES</span></div>
+        <div class="emotions" id="emotions" aria-label="Escolha uma expressão"></div>
+        <div class="section-label"><h2>Últimas respostas</h2><span id="history-count">00</span></div>
+        <div id="history" class="history"><p class="empty">Suas respostas aparecerão aqui.</p></div>
+      </section>
+      <section id="commands" class="page" aria-label="Comandos">
+        <p class="eyebrow">VOCÊ PEDE, EU AJUDO</p><h1>O que posso fazer.</h1><p class="intro-text">Toque em um exemplo para colocá-lo no campo de comando.</p>
+        <div id="command-list" class="command-list"></div>
+        <div class="tip"><strong>Use dentro de outro aplicativo</strong><p>Ative o controle da tela na aba Acessos. Abra o app desejado e toque no meu botão flutuante para falar ou digitar.</p></div>
+        <div class="tip"><strong>Um comando por vez</strong><p>Diga o nome exato do botão para tocar. Para escrever, selecione o campo antes e diga “escreva” seguido do texto.</p></div>
+      </section>
+      <section id="access" class="page" aria-label="Acessos">
+        <p class="eyebrow">DO SEU JEITO</p><h1>Você escolhe<br>meus acessos.</h1><p class="intro-text">Ative as funções que deseja usar. O Android pedirá sua autorização.</p>
+        <div class="permission-card"><div class="permission-head"><span class="quick-icon"><svg><use href="#i-mic"/></svg></span><span><strong>Microfone</strong><small>Receber seus comandos de voz</small></span><span id="p-microphone" class="badge">PENDENTE</span></div><p>A escuta começa quando você toca em Falar e termina após uma frase. A voz local é usada quando está disponível; a alternativa é o serviço de voz do Android.</p><button class="secondary" data-permission="microphone">Configurar microfone <svg><use href="#i-arrow"/></svg></button></div>
+        <div class="permission-card"><div class="permission-head"><span class="quick-icon"><svg><use href="#i-screen"/></svg></span><span><strong>Controle da tela</strong><small>Tocar, rolar, escrever e navegar</small></span><span id="p-control" class="badge">PENDENTE</span></div><p>Permite agir na tela por seus comandos e mostrar o botão flutuante. O texto da tela é consultado quando você pede uma ação e não é enviado para servidores.</p><button class="secondary" data-permission="control">Configurar controle <svg><use href="#i-arrow"/></svg></button><button class="text-button" id="stop-control" hidden>Desativar controle agora</button></div>
+        <div class="permission-card"><div class="permission-head"><span class="quick-icon"><svg><use href="#i-bell"/></svg></span><span><strong>Notificações</strong><small>Ler os avisos ativos em voz alta</small></span><span id="p-notifications" class="badge">PENDENTE</span></div><p>A leitura acontece quando você pede. Nenhum histórico de notificações é salvo.</p><button class="secondary" data-permission="notifications">Configurar notificações <svg><use href="#i-arrow"/></svg></button></div>
+        <div class="settings-card"><label><span><strong>Respostas faladas</strong><small>A Sexta Feira responde em português</small></span><input id="voice-toggle" type="checkbox" role="switch" checked></label><label><span><strong>Botão flutuante</strong><small>Chame a assistente em outros apps</small></span><input id="bubble-toggle" type="checkbox" role="switch" checked></label></div>
+        <button class="secondary" data-permission="tts">Ajustar a voz do Android <svg><use href="#i-arrow"/></svg></button>
+        <div class="tip"><strong>Se o Android bloquear a ativação</strong><p>Em alguns celulares, apps instalados por arquivo precisam de um passo a mais: Informações do app → menu ⋮ → Permitir configurações restritas. Depois, volte aqui e configure o controle.</p><button class="text-button" data-permission="app">Abrir informações do app</button></div>
+        <div class="tip limits"><strong>Sobre esta versão</strong><p>Executa os comandos desta lista no seu celular. O acesso segue as permissões do Android; telas protegidas e campos de senha têm limitações. Conversas livres com IA e execução autônoma de tarefas não estão conectadas nesta versão.</p></div>
+      </section>
+    </main>
+    <nav class="bottom-nav" aria-label="Navegação"><button data-page="home" class="selected" aria-current="page"><svg><use href="#i-face"/></svg><span>Assistente</span></button><button data-page="commands"><svg><use href="#i-bolt"/></svg><span>Comandos</span></button><button data-page="access"><svg><use href="#i-settings"/></svg><span>Acessos</span></button></nav>
+  </div>
+  <script src="face-models.js"></script><script src="face-engine.js"></script><script src="app.js"></script>
+</body>
+</html>

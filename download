@@ -1,0 +1,11 @@
+.gradle/
+build/
+app/build/
+local.properties
+*.jks
+*.keystore
+*.apk
+*.idsig
+__pycache__/
+assinatura-base64.txt
+android-tools/

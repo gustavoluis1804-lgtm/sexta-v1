@@ -2,6 +2,28 @@
 
 Realizada em 7 de outubro de 2026.
 
+## Compilação pelo GitHub
+
+- Fluxo `.github/workflows/gerar-apk.yml` configurado para execução manual e
+  alterações nas branches `main` ou `master`.
+- Sintaxe YAML e dos comandos Bash verificada. As três actions oficiais estão
+  fixadas em commits completos, confirmados nas respectivas tags.
+- Extração do ZIP do projeto testada com os mesmos comandos do fluxo.
+- Compilação local pelo script com `--test`: 56 verificações passaram e o APK
+  foi gerado e validado com assinaturas v2 e v3.
+- Assinatura opcional por secrets testada com uma chave restaurada de Base64.
+  A senha foi fornecida por variável de ambiente. Configuração incompleta de
+  secrets foi rejeitada antes da compilação.
+- O arquivo entregue em Artifacts é apenas o APK; chaves de assinatura não são
+  incluídas no projeto ou no download gerado.
+
+A compilação ainda não foi executada nos servidores do GitHub. Ela acontecerá
+depois que o usuário enviar o pacote ao próprio repositório. As verificações
+anteriores do aplicativo continuam válidas; o código de execução no Android
+não foi alterado nesta etapa.
+
+## Aplicativo Android
+
 - Código Java e recursos Android compilados contra o SDK oficial 35.
 - APK gerado para Android 8 / API 26 ou superior, com alvo API 35.
 - Alinhamento do APK confirmado com `zipalign`.

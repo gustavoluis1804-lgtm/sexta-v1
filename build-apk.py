@@ -18,7 +18,11 @@ ROOT = Path(__file__).resolve().parent
 parser = argparse.ArgumentParser()
 parser.add_argument('--tools', type=Path, default=ROOT.parent / 'android-tools')
 parser.add_argument('--output', type=Path, default=ROOT / 'build' / 'Sexta-Feira.apk')
+parser.add_argument('--keystore', type=Path, default=os.environ.get('SEXTA_KEYSTORE_PATH') or None)
+parser.add_argument('--test', action='store_true', help='Run the local command checks before packaging')
 args = parser.parse_args()
+if args.keystore and (not args.keystore.is_file() or not os.environ.get('SEXTA_STORE_PASSWORD')):
+    parser.error('A supplied keystore must exist and SEXTA_STORE_PASSWORD must be set.')
 tools = args.tools.resolve()
 tools.mkdir(parents=True, exist_ok=True)
 build = ROOT / 'build'
@@ -76,6 +80,13 @@ java_sources = sorted((source/'java').rglob('*.java')) + sorted(generated.rglob(
 bootclasspath=str(android)+os.pathsep+str(sdk/'core-lambda-stubs.jar')
 run('java','-jar',ecj,'-source','1.8','-target','1.8','-bootclasspath',bootclasspath,
     '-encoding','UTF-8','-warn:none','-d',classes,*java_sources)
+if args.test:
+    test_classes=build/'test-classes'
+    test_classes.mkdir(exist_ok=True)
+    run('java','-jar',ecj,'-source','1.8','-target','1.8','-bootclasspath',bootclasspath,
+        '-cp',classes,'-encoding','UTF-8','-warn:none','-d',test_classes,
+        ROOT/'tests'/'CommandParserCheck.java')
+    run('java','-cp',str(classes)+os.pathsep+str(test_classes),'CommandParserCheck')
 with zipfile.ZipFile(build/'classes.jar','w',zipfile.ZIP_DEFLATED) as z:
     for path in sorted(classes.rglob('*.class')): z.write(path,path.relative_to(classes))
 dex = build/'dex'
@@ -88,17 +99,19 @@ with zipfile.ZipFile(unsigned,'a',zipfile.ZIP_DEFLATED) as z:
     for path in sorted(dex.glob('*.dex')): z.write(path,path.name)
 aligned = build/'aligned.apk'
 run(sdk/'zipalign','-f','-p','4',unsigned,aligned)
-key = tools/'sexta-feira-local.keystore'
-key_password='sexta-feira-local-build'
-if not key.exists():
+key = args.keystore.resolve() if args.keystore else tools/'sexta-feira-local.keystore'
+key_password=os.environ['SEXTA_STORE_PASSWORD'] if args.keystore else 'sexta-feira-local-build'
+key_alias=os.environ.get('SEXTA_KEY_ALIAS','sexta-feira') if args.keystore else 'sexta-feira'
+if not args.keystore and not key.exists():
     run('keytool','-genkeypair','-keystore',key,'-storepass',key_password,'-keypass',key_password,
         '-alias','sexta-feira','-keyalg','RSA','-keysize','2048','-validity','10000',
         '-dname','CN=Sexta Feira, OU=Personal App, O=Gustavo, C=BR')
     key.chmod(0o600)
 # The local personal-build password is passed by environment instead of command arguments.
-signing_env = dict(os.environ, SEXTA_LOCAL_STORE_PASS=key_password)
-subprocess.run([str(sdk/'apksigner'),'sign','--ks',str(key),'--ks-key-alias','sexta-feira',
-    '--ks-pass','env:SEXTA_LOCAL_STORE_PASS','--key-pass','env:SEXTA_LOCAL_STORE_PASS',
+signing_env = dict(os.environ, SEXTA_LOCAL_STORE_PASS=key_password,
+                  SEXTA_LOCAL_KEY_PASS=os.environ.get('SEXTA_KEY_PASSWORD',key_password) if args.keystore else key_password)
+subprocess.run([str(sdk/'apksigner'),'sign','--ks',str(key),'--ks-key-alias',key_alias,
+    '--ks-pass','env:SEXTA_LOCAL_STORE_PASS','--key-pass','env:SEXTA_LOCAL_KEY_PASS',
     '--out',str(output),str(aligned)],env=signing_env,check=True)
 run(sdk/'apksigner','verify','--verbose',output)
 run(sdk/'zipalign','-c','4',output)
